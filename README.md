@@ -1,2 +1,2 @@
 # Kanban-Board
-A Kanban board application for managing tasks with columns like To Do, In Progress, and Done.
+A Kanban board project designed to help teams visualize workflows, manage tasks, and improve productivity using a simple drag-and-drop interface.
