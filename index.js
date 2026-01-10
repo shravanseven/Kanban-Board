@@ -1,3 +1,5 @@
+const tasksData = {};
+
 const todo = document.querySelector('#todo');
 const progress = document.querySelector('#progress');
 const done = document.querySelector('#done');
@@ -7,8 +9,33 @@ const modal = document.querySelector('.modal');
 const modalBg = document.querySelector('.modal .bg')
 const tasks = document.querySelectorAll('.tasks');
 const addNewTaskButton = document.querySelector('#add-new-task');
-const deleteButton = document.querySelector('#deleteButton');
 let count = null;
+
+if(localStorage.getItem("tasks")){
+    const data = JSON.parse(localStorage.getItem("tasks"));
+    console.log(data);
+    for (const col in data){
+        const column = document.querySelector(`#${col}`);
+        data[col].forEach(task => {
+            const div = document.createElement('div');
+            
+            div.classList.add('tasks');
+            div.setAttribute("draggable", "true");
+
+            div.innerHTML = `<h2>${task.title}</h2><p>${task.desc}</p><button>Delete</button>`;
+            column.appendChild(div);
+
+            div.addEventListener("drag", () => {
+                draggedItem = div;
+            });
+        });
+
+        const tasks = column.querySelectorAll('.tasks');
+        const count = column.querySelector('.right');
+
+        count.innerHTML = tasks.length;
+    }
+}
 
 tasks.forEach(task => {
     task.addEventListener("drag", e => {
@@ -31,14 +58,22 @@ function addDragEventOnColumn(column) {
     });
     column.addEventListener("drop", event => {
         event.preventDefault();
-        console.log("dropped", draggedItem, column);
         column.appendChild(draggedItem);
         column.classList.remove('hover-over');
+        
         [todo, progress, done].forEach(col => {
             const tasks = col.querySelectorAll('.tasks');
             const count = col.querySelector('.right');
+            tasksData[col.id] = Array.from(tasks).map(t => {
+                return {
+                    title: t.querySelector("h2").innerText,
+                    desc: t.querySelector("p").innerText
+                }
+            });
+            localStorage.setItem("tasks", JSON.stringify(tasksData));
             count.innerText = tasks.length;
-        }); 
+
+        });
     });
 };
 
@@ -54,6 +89,7 @@ modalBg.addEventListener("click", () => {
     modal.classList.remove("active");
 })
 
+// modal logic
 addNewTaskButton.addEventListener("click", () => {
     const taskTitle = document.querySelector('#task-title').value;
     const taskDesc = document.querySelector('#task-desc').value;          
@@ -65,6 +101,17 @@ addNewTaskButton.addEventListener("click", () => {
     modal.classList.remove("active");
     div.addEventListener("drag", () => {
         draggedItem = div;
-    })
+    });
+    [todo, progress, done].forEach(col => {
+        const tasks = col.querySelectorAll('.tasks');
+        const count = col.querySelector('.right');
+        count.innerText = tasks.length;
+        tasksData[col.id] = Array.from(tasks).map(t => {
+            return {
+                title: t.querySelector("h2").innerText,
+                desc: t.querySelector("p").innerText
+            }
+        });
+        localStorage.setItem("tasks", JSON.stringify(tasksData));
+    });
 });
-
